@@ -43,6 +43,10 @@ const commands = [
     {
         name: 'slack',
         description: 'Olá Slack!'
+    },
+    {
+        name: 'dog',
+        description: 'Cachorro aleatório estilo quitéria...'
     }
 ];
 
@@ -108,6 +112,8 @@ client.on('interactionCreate', async (interaction) => {
     }
     else if(interaction.commandName === 'slack'){
         interaction.reply('Olá Slack')
+    } else if (interaction.commandName === 'dog') {
+        interaction.reply('https://tenor.com/pt-BR/view/dog-bald-dog-lmao-meme-black-noob-gif-12233867927035438360');
     }
 })
 
