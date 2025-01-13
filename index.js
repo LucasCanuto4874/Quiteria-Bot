@@ -1,8 +1,12 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 
+
 const TOKEN = 'Coloque seu token';
 const CLIENT_ID = 'coloque o client id'
 const GUILD_ID = 'coloque o guild id'
+
+
+
 
 // Lista de comandos
 const commands = [
@@ -112,9 +116,36 @@ client.on('interactionCreate', async (interaction) => {
     else if(interaction.commandName === 'slack'){
         interaction.reply('Olá Slack')
     } else if (interaction.commandName === 'dog') {
-        interaction.reply({content: "Quitéria", embeds: ['https://tenor.com/pt-BR/view/dog-bald-dog-lmao-meme-black-noob-gif-12233867927035438360.gif']});
+        const gifUrl = gerarGif()
+        const embeds = {
+            color: 0x00ff00,
+            title: 'Quidog',
+            image: {url: gifUrl}
+        }
+        interaction.reply({embeds: [embeds]});
     }
 })
+// Lista de Gifs
+const gif = [
+    'https://media.tenor.com/LmXWDEt07L0AAAAM/cachorro-batendo-panela-n-peita.gif',
+    'https://media1.tenor.com/m/qcduD9P95RgAAAAd/dog-bald-dog.gif',
+    'https://media1.tenor.com/m/f911hugXZHAAAAAd/scrunchy-dog-awkward-smile.gif',
+    'https://media1.tenor.com/m/wp52_ax4waUAAAAd/dachshund-dog.gif',
+    'https://media1.tenor.com/m/y1_R-Cyg6noAAAAd/cachorro-no%C3%B4nibus.gif',
+    'https://media1.tenor.com/m/2zdlJaB19iAAAAAd/cute-dog.gif',
+    'https://media1.tenor.com/m/yOleO_qKGccAAAAd/puppy-dog.gif',
+    'https://media1.tenor.com/m/PREDV1I6I4gAAAAd/dog-feral.gif',
+    'https://media1.tenor.com/m/jm-992BT-4IAAAAd/dog-dog-backwards.gif',
+    'https://media1.tenor.com/m/4Q40PZIgfMUAAAAd/k%C3%B6pek-dog.gif',
+    'https://media1.tenor.com/m/s0pElLSXstsAAAAd/kreggy-dog.gif',
+    'https://media1.tenor.com/m/wCHolCJgSBwAAAAd/dog-dog-funny.gif',
+    'https://media1.tenor.com/m/pmH1WP4iSvwAAAAd/dog-jump.gif']
+
+function gerarGif(){
+    const indexGif = Math.floor(Math.random() * gif.length)
+    console.log(indexGif)
+    return gif[indexGif]
+}
 
 // Login do bot
 client.login(TOKEN);
