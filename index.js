@@ -67,7 +67,6 @@ const rest = new REST({ version: '10' }).setToken(TOKEN);
 })();
 
 
-
 //Criando conexão para o bot interprestar as mensagens
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
