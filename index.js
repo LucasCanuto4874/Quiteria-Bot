@@ -1,8 +1,8 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 
-const TOKEN = 'Coloque seu token';
-const CLIENT_ID =  'coloque o client id'
-const GUILD_ID = 'coloque o guild id'
+const TOKEN = '';
+const CLIENT_ID = ''
+const GUILD_ID = ''
 
 // Lista de comandos
 const commands = [
@@ -133,10 +133,10 @@ client.on("interactionCreate", async (interaction) => {
     else if (interaction.commandName === 'slack') {
         interaction.reply('Olá Slack')
     } else if (interaction.commandName === 'dog') {
-        const gifUrl = gerarGif()
+        const { gifUrl, texto } = gerarGif()
         const embeds = {
             color: 0x00ff00,
-            title: 'Quidog',
+            title: texto,
             image: { url: gifUrl }
         }
         interaction.reply({ embeds: [embeds] });
