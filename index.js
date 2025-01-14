@@ -159,7 +159,7 @@ client.on("interactionCreate", async (interaction) => {
             console.log('numero aleatorio', randomNumber)
             const gif = gerarGif()
             const embeds = {
-                color: 0x00ff00,
+                color: parseInt('A18262',16),
                 title: 'Você acertou a porquinteria!!',
                 image: { url: gif }
             }
