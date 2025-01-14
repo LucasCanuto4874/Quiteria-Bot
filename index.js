@@ -1,12 +1,8 @@
 const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 
-
 const TOKEN = 'Coloque seu token';
 const CLIENT_ID = 'coloque o client id'
 const GUILD_ID = 'coloque o guild id'
-
-
-
 
 // Lista de comandos
 const commands = [
@@ -51,6 +47,16 @@ const commands = [
     {
         name: 'dog',
         description: 'Cachorro aleatório estilo quitéria...'
+    },
+    {
+        name: 'adivinhar',
+        description: 'tente adivinhar um número de 1 a 10 que o bot escolheu',
+        options: [{
+            type: 4,
+            name: 'num',
+            description: 'Digite o seu chute',
+            required: true
+        }]
     }
 ];
 
@@ -113,16 +119,41 @@ client.on('interactionCreate', async (interaction) => {
         console.log(`números que o usuario digitou foram ${n1} e ${n2}`)
         interaction.reply(`${resultado}`)
     }
-    else if(interaction.commandName === 'slack'){
+    else if (interaction.commandName === 'slack') {
         interaction.reply('Olá Slack')
     } else if (interaction.commandName === 'dog') {
         const gifUrl = gerarGif()
         const embeds = {
             color: 0x00ff00,
             title: 'Quidog',
-            image: {url: gifUrl}
+            image: { url: gifUrl }
         }
-        interaction.reply({embeds: [embeds]});
+        interaction.reply({ embeds: [embeds] });
+    }
+    else if (interaction.commandName === 'adivinhar') {
+        var numeroUsuario = interaction.options.getInteger('num')
+        var randomNumber = Math.floor(Math.random() * 10) + 1
+
+        if (numeroUsuario != randomNumber) {
+            console.log('numero aleatorio', randomNumber)
+            const gif = gerarGif()
+            const embeds = {
+                color: 0x00ff00,
+                title: 'Você não acertou porquinteria!!',
+                image: { url: gif }
+            }
+            interaction.reply({ embeds: [embeds] })
+        }
+        else {
+            console.log('numero aleatorio', randomNumber)
+            const gif = gerarGif()
+            const embeds = {
+                color: 0x00ff00,
+                title: 'Você acertou a porquinteria!!',
+                image: { url: gif }
+            }
+            interaction.reply({ embeds: [embeds] })
+        }
     }
 })
 // Lista de Gifs
@@ -141,7 +172,7 @@ const gif = [
     'https://media1.tenor.com/m/wCHolCJgSBwAAAAd/dog-dog-funny.gif',
     'https://media1.tenor.com/m/pmH1WP4iSvwAAAAd/dog-jump.gif']
 
-function gerarGif(){
+function gerarGif() {
     const indexGif = Math.floor(Math.random() * gif.length)
     console.log(indexGif)
     return gif[indexGif]
