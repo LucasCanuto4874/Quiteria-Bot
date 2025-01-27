@@ -1,17 +1,48 @@
 const { Client, GatewayIntentBits, REST, Routes } = require("discord.js");
-const { Player, useMainPlayer, useQueue, useTimeline } = require("discord-player");
+const {
+  Player,
+  useMainPlayer,
+  useQueue,
+  useTimeline,
+  QueueRepeatMode,
+} = require("discord-player");
 const { YoutubeiExtractor } = require("discord-player-youtubei");
 const { SpotifyExtractor } = require("@discord-player/extractor");
 const { fetch, setGlobalDispatcher, Agent } = require("undici");
 
 setGlobalDispatcher(new Agent({ connect: { timeout: 60_000 } }));
 
+const client = new Client({
+  restTimeOffset: 0,
+  shards: "auto",
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
+  ],
+  retryLimit: 3,
+  timeout: 20000,
+});
+const player = new Player(client, {
+  leaveOnEnd: true,
+  leaveOnEndCooldown: 10000,
+  leaveOnStop: true,
+  leaveOnEmpty: true,
+  leaveOnEmptyCooldown: 5000,
+  altoSelfDeaf: true,
+  initialVolume: 50,
+  bufferingTimeout: 10000,
+  skipFFmpeg: false,
+  connectionTimeout: 10000,
+});
+
 const TOKEN =
   "";
 const CLIENT_ID = "";
 const GUILD_ID = "";
-
 // Lista de comandos
+
 const commands = [
   {
     name: "somar",
@@ -83,8 +114,41 @@ const commands = [
   },
   {
     name: "pausar",
-    description:"Pausar ou despausar a música atual"
-  }
+    description: "Pausar ou despausar a música atual",
+  },
+  {
+    name: "fila",
+    description: "Mostra a fila atual!",
+  },
+  {
+    name: "skip",
+    description: "Pula a música atual!",
+  },
+  {
+    name: "loop",
+    description: "Modo de loop",
+    options: [
+      {
+        type: 10,
+        name: "modo",
+        description: "Defina o modo de loop para as músicas",
+        choices: [
+          {
+            name: "Single",
+            value: QueueRepeatMode.TRACK,
+          },
+          {
+            name:"All",
+            value:QueueRepeatMode.QUEUE
+          },
+          {
+            name:"Off",
+            value:QueueRepeatMode.OFF
+          }
+        ],
+      },
+    ],
+  },
 ];
 
 //Enviar comandos para o discord
@@ -106,30 +170,6 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 })();
 
 //Criando conexão para o bot interprestar as mensagens
-const client = new Client({
-  restTimeOffset: 0,
-  shards: "auto",
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildVoiceStates,
-  ],
-  retryLimit: 3,
-  timeout: 20000,
-});
-
-const player = new Player(client, {
-  leaveOnEnd: true,
-  leaveOnStop: true,
-  leaveOnEmpty: true,
-  leaveOnEmptyCooldown: 5000,
-  altoSelfDeaf: true,
-  initialVolume: 50,
-  bufferingTimeout: 10000,
-  skipFFmpeg: false,
-  connectionTimeout: 10000,
-});
 
 player.extractors.register(SpotifyExtractor, {});
 player.extractors.register(YoutubeiExtractor, {});
@@ -149,75 +189,161 @@ client.on("messageCreate", (message) => {
   }
 });
 
+player.events.on('error', (queue, error) => {
+  console.error(`Erro no player na guilda ${queue.guild.name}:`, error.message);
+  queue.metadata.channel.send('⚠️ Ocorreu um erro no player. Tente novamente!');
+});
+
+player.events.on('playerError', (queue, error) => {
+  console.error(`Erro durante a reprodução na guilda ${queue.guild.name}:`, error.message);
+  queue.metadata.channel.send('⚠️ Houve um problema durante a reprodução da música.');
+});
+
 //Parte de interações
 client.on("interactionCreate", async (interaction) => {
   // verificando se a interação é a partir de um comando
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === "tocar") {
-    const canal = interaction.member.voice.channel;
-    if (!canal)
-      return interaction.reply(
-        "Você precisa entrar em um canal de voz, Quica!"
-      );
-
-    const musica = interaction.options.getString("música");
-    if (!musica)
-      return interaction.reply(
-        "Digite o nome ou um link de uma música, Quica!"
-      );
-
-    const queue = useMainPlayer().nodes.create(interaction.guild.id, {
-      metadata: {
-        channel: interaction.channel,
-      },
-      selfDeaf: true,
-    });
-
     try {
-      // Verifica se o bot já está conectado
+      await interaction.deferReply(); // Marca como processando
+
+      const canal = interaction.member.voice.channel;
+      if (!canal) {
+        return await interaction.editReply(
+          "Você precisa entrar em um canal de voz, Quica!"
+        );
+      }
+
+      const musica = interaction.options.getString("música");
+      if (!musica) {
+        return await interaction.editReply(
+          "Digite o nome ou um link de uma música, Quica!"
+        );
+      }
+
+      const player = useMainPlayer(); // Certifique-se de que o player está inicializado
+      const queue = player.nodes.create(interaction.guild.id, {
+        metadata: {
+          channel: interaction.channel,
+        },
+        selfDeaf: true,
+      });
+
       if (!queue.connection) {
         await queue.connect(canal);
         console.log("Bot conectado ao canal de voz");
       }
 
-      // Procura pela música
       const track = await player.search(musica, {
         requestedBy: interaction.user,
       });
-      console.log(track);
+
       if (!track || !track.tracks.length) {
-        return interaction.reply("Nenhuma música encontrada, irmã Quica!");
+        return await interaction.editReply(
+          "Nenhuma música encontrada, irmã Quica!"
+        );
       }
 
-      // Adiciona a faixa à fila de reprodução
       queue.addTrack(track.tracks[0]);
 
-      // Verifica se a música não está tocando e começa a reprodução
       if (!queue.isPlaying()) {
         await queue.node.play();
         console.log("Música tocando agora...");
+        return await interaction.editReply(
+          `**Tocando agora:** ${track.tracks[0].title}`
+        );
+      } else {
+        return await interaction.editReply(
+          `**Música adicionada à playlist:** ${track.tracks[0].title}`
+        );
       }
-
-      interaction.reply(`Tocando agora: ${track.tracks[0].title}`);
     } catch (error) {
       console.error("Erro ao tentar conectar ou tocar a música:", error);
-      queue.delete();
-      return await interaction.reply("Não foi possível se conectar ao canal.");
+      const queue = player.nodes.create(interaction.guild.id, {
+        metadata: {
+          channel: interaction.channel,
+        },
+      });
+      if (queue) queue.delete(); // Remove a fila para evitar problemas futuros
+      return await interaction.Reply(
+        "Não foi possível se conectar ao canal."
+      );
     }
   }
-  if(interaction.commandName == "pausar"){
+  if (interaction.commandName == "pausar") {
     const timeline = useTimeline({
-      node: interaction.guild
-    })
+      node: interaction.guild,
+    });
     if (!timeline) {
-      return interaction.reply('Este servidor não tem uma sessão de player ativa, Culega!');
+      return interaction.reply(
+        "Este servidor não tem uma sessão de player ativa, Culega!"
+      );
     }
-
 
     const wasPaused = timeline.paused;
     wasPaused ? timeline.resume() : timeline.pause();
-    return interaction.reply(`A música está: ${wasPaused ? 'Tocando' : 'Pausada'}.`);
+    return interaction.reply(
+      `A música está: ${wasPaused ? "Despausada" : "Pausada"}.`
+    );
+  }
+
+  if (interaction.commandName === "fila") {
+    const queue = useQueue(interaction.guild.id);
+    if (!queue) return interaction.reply("Não existem músicas na fila");
+    const musicaAtual = queue.currentTrack;
+    const proximaMusica = queue.tracks.toArray().slice(0, 5);
+
+    const mensagem = [
+      `**Agora está tocando:** ${musicaAtual.title} - ${musicaAtual.author}`,
+      ``,
+      `**Proximas músicas:**`,
+      proximaMusica.map(
+        (track, index) => `**${index + 1}.** ${track.title} - ${track.author}`
+      ),
+    ].join("\n");
+
+    return interaction.reply(mensagem);
+  }
+
+  if (interaction.commandName === "skip") {
+    const queue = useQueue(interaction.guild.id);
+    if (!queue)
+      return interaction.reply(
+        "Este servidor não tem uma sessão de player ativa, Culega!"
+      );
+    if (!queue.isPlaying())
+      return interaction.reply("Não tem nenhuma música tocando, culega!");
+
+    interaction.reply(`Skipando a música ${queue.currentTrack.title}`);
+    queue.node.skip();
+
+    return;
+  }
+
+  if (interaction.commandName === "loop") {
+    const queue = useQueue(interaction.guild.id);
+    if (!queue)
+      return interaction.reply(
+        "Este servidor não tem uma sessão de player ativa, Culega!"
+      );
+    const loopMode = interaction.options.getNumber('modo');
+
+    console.log(loopMode)
+   
+    let modo
+    
+    if(loopMode === 0)
+      modo = "Modo loop desativado."
+    
+    else if(loopMode === 1)
+      modo = "Modo loop nessa música"
+    else if(loopMode === 2)
+      modo = "Modo loop na fila inteira"
+
+    queue.setRepeatMode(loopMode)
+
+    return interaction.reply(modo)
   }
 
   if (interaction.commandName === "somar") {
@@ -291,6 +417,7 @@ const gif = [
   "https://media1.tenor.com/m/s0pElLSXstsAAAAd/kreggy-dog.gif",
   "https://media1.tenor.com/m/wCHolCJgSBwAAAAd/dog-dog-funny.gif",
   "https://media1.tenor.com/m/pmH1WP4iSvwAAAAd/dog-jump.gif",
+  "https://cdn.discordapp.com/attachments/1328111900340256808/1328819229553856605/image.png?ex=678816d8&is=6786c558&hm=d528bdb9179d703a1fd0a7ad502e5c2c3d0cc9e4d5362f3132647a348ad26f4e&",
 ];
 
 function gerarGif() {
@@ -337,6 +464,8 @@ function gerarGif() {
     case 12:
       texto = "Cachorros da Quitéria pulando corda";
       break;
+    case 13:
+      texto = "Cachorro da Quica fazendo código bunda!";
   }
   const gifUrl = gif[indexGif];
   return { gifUrl, texto };
