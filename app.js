@@ -1,5 +1,5 @@
 import{ Client, GatewayIntentBits, REST, Routes } from 'discord.js';
-import { commands } from "./comandos.js";
+import { commands } from "./src/comandos.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,12 +23,10 @@ client.once("ready", async () => {
   console.log(`Bot está online como ${client.user.tag}!`);
 
   try {
-    console.log("Registrando comandos localmente...");
+    console.log("Registrando comandos globais...");
     console.log(`🔧 CLIENT_ID: ${CLIENT_ID}`);
-    console.log(`🔧 GUILD_ID: ${GUILD_ID}`);
 
-    // Registro de comandos no servidor específico
-    const resultado = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+    const resultado = await rest.put(Routes.applicationCommands(CLIENT_ID), {
       body: commands,
     });
 

@@ -50,6 +50,10 @@ export const commands = [
             description: 'Digite o seu chute',
             required: true
         }]
+    },
+    {
+        name: 'laura',
+        description: 'Comando para a Laura'
     }
 ];
 
