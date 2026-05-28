@@ -1,5 +1,5 @@
 import { client } from "../app.js";
-import { Calculadora } from "./calculadora/calculadora.js";
+import { comandoCalculadora } from "./calculadora/calculadora.js";
 import { gerarGif } from "./gif_dogs/gif-dogs.js";
 import { GifEmbed } from "./embeds/gif-embed.js";
 import {
@@ -9,10 +9,8 @@ import {
 } from "./laura/laura-components.js";
 import { gerarNumeroAleatorio } from "./random_number/random-number.js";
 client.on("messageCreate", (message) => {
-  // Verifica se a mensagem não é do próprio bot
   if (message.author.bot) return;
 
-  // Envia uma mensagem ao detectar "oi"
   if (message.content.toLowerCase() === "oi") {
     message.channel.send(`olá ${message.author.username}!`);
   }
@@ -55,12 +53,8 @@ client.on("interactionCreate", async (interaction) => {
 
   switch (interaction.commandName) {
     case "somar": {
-      var resultado = Calculadora(
-        interaction.options.getNumber("n1"),
-        interaction.options.getNumber("n2"),
-        "somar"
-      );
-      interaction.reply(`${resultado}`);
+      console.log("entrei dentro do comando somar");
+      comandoCalculadora(interaction);
       break;
     }
     case "multiplicar": {
