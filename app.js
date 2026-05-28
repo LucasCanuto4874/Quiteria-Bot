@@ -17,14 +17,13 @@ export const client = new Client({
   ],
 });
 
-const teste = client.login(TOKEN);
+client.login(TOKEN);
 
 client.once("ready", async () => {
-  console.log(`✅ Bot está online como ${client.user.tag}!`);
-  console.log(`📋 Intents ativadas: Guilds, GuildMessages, MessageContent`);
-  
+  console.log(`Bot está online como ${client.user.tag}!`);
+
   try {
-    console.log("📤 Registrando comandos localmente...");
+    console.log("Registrando comandos localmente...");
     console.log(`🔧 CLIENT_ID: ${CLIENT_ID}`);
     console.log(`🔧 GUILD_ID: ${GUILD_ID}`);
 
@@ -33,11 +32,8 @@ client.once("ready", async () => {
       body: commands,
     });
 
-    console.log(`✅ Comandos registrados com sucesso!`);
-    console.log(`📝 Total de comandos: ${resultado.length}`);
-    resultado.forEach(cmd => console.log(`   - /${cmd.name}`));
+    console.log(`Comandos registrados com sucesso!`);
   } catch (error) {
-    console.error("❌ Erro ao registrar comandos:", error.message);
-    console.error("Detalhes:", error);
+    console.error("Erro ao registrar comandos:", error.message);
   }
 });
