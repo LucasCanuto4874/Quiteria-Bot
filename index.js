@@ -1,4 +1,4 @@
-import { client } from "./app";
+import { client } from "./app.js";
 
 client.on("messageCreate", (message) => {
   // Verifica se a mensagem não é do próprio bot
@@ -7,36 +7,31 @@ client.on("messageCreate", (message) => {
   // Envia uma mensagem ao detectar "oi"
   if (message.content.toLowerCase() === "oi") {
     message.channel.send(`olá ${message.author.username}!`);
-    console.log(message.author.username);
   }
 });
 
 //Parte de interações
 client.on("interactionCreate", async (interaction) => {
   // verificando se a interação é a partir de um comando
-  if (!interaction.isCommand()) return;
+  if (!interaction.isCommand()) {
+    return;
+  }
 
   if (interaction.commandName === "somar") {
     var n1 = interaction.options.getNumber("n1");
     var n2 = interaction.options.getNumber("n2");
     var resultado = n1 + n2;
-
-    console.log(`números que o usuario digitou foram ${n1} e ${n2}`);
     interaction.reply(`${resultado}`);
   } else if (interaction.commandName === "multiplicar") {
     var n1 = interaction.options.getNumber("n1");
     var n2 = interaction.options.getNumber("n2");
     var resultado = n1 * n2;
-
-        console.log(`números que o usuario digitou foram ${n1} e ${n2}`)
         interaction.reply(`${resultado}`)
     }
     else if (interaction.commandName === 'multiplicar') {
         var n1 = interaction.options.getNumber('n1')
         var n2 = interaction.options.getNumber('n2')
         var resultado = n1 * n2
-
-        console.log(`números que o usuario digitou foram ${n1} e ${n2}`)
         interaction.reply(`${resultado}`)
     }
     else if (interaction.commandName === 'slack') {
@@ -55,7 +50,6 @@ client.on("interactionCreate", async (interaction) => {
         var randomNumber = Math.floor(Math.random() * 10) + 1
 
         if (numeroUsuario != randomNumber) {
-            console.log('numero aleatorio', randomNumber)
             const gif = gerarGif()
             const embeds = {
                 color: 0x00ff00,
@@ -65,7 +59,6 @@ client.on("interactionCreate", async (interaction) => {
             interaction.reply({ embeds: [embeds] })
         }
         else {
-            console.log('numero aleatorio', randomNumber)
             const gif = gerarGif()
             const embeds = {
                 color: parseInt('A18262',16),
@@ -74,6 +67,9 @@ client.on("interactionCreate", async (interaction) => {
             }
             interaction.reply({ embeds: [embeds] })
         }
+    }
+    else {
+      interaction.reply(`❌ Comando \`${interaction.commandName}\` não reconhecido!`).catch(console.error);
     }
 })
 // Lista de Gifs
@@ -95,7 +91,6 @@ const gif = [
 
 function gerarGif() {
   const indexGif = Math.floor(Math.random() * (gif.length - 1));
-  console.log(indexGif);
   var texto = "";
   switch (indexGif) {
     case 0:

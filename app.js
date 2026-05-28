@@ -1,3 +1,4 @@
+import{ Client, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { commands } from "./comandos.js";
 import dotenv from "dotenv";
 
@@ -6,25 +7,8 @@ dotenv.config();
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const GUILD_ID = process.env.GUILD_ID;
-const { Client, GatewayIntentBits, REST, Routes } = require('discord.js');
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
-(async () => {
-  try {
-    console.log("Registrando comandos localmente...");
-
-    // Registro de comandos globais
-    await rest.put(Routes.applicationCommands(CLIENT_ID, GUILD_ID), {
-      body: commands,
-    });
-
-    console.log("Comandos locais registrados com sucesso!");
-  } catch (error) {
-    console.error("Erro ao registrar comandos locais:", error);
-  }
-})();
-
-//Criando conexão para o bot interprestar as mensagens
 export const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -33,9 +17,27 @@ export const client = new Client({
   ],
 });
 
-client.once("ready", () => {
-  console.log(`Bot está online como ${client.user.tag}!`);
-});
+const teste = client.login(TOKEN);
 
-// Login do bot
-client.login(TOKEN);
+client.once("ready", async () => {
+  console.log(`✅ Bot está online como ${client.user.tag}!`);
+  console.log(`📋 Intents ativadas: Guilds, GuildMessages, MessageContent`);
+  
+  try {
+    console.log("📤 Registrando comandos localmente...");
+    console.log(`🔧 CLIENT_ID: ${CLIENT_ID}`);
+    console.log(`🔧 GUILD_ID: ${GUILD_ID}`);
+
+    // Registro de comandos no servidor específico
+    const resultado = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+      body: commands,
+    });
+
+    console.log(`✅ Comandos registrados com sucesso!`);
+    console.log(`📝 Total de comandos: ${resultado.length}`);
+    resultado.forEach(cmd => console.log(`   - /${cmd.name}`));
+  } catch (error) {
+    console.error("❌ Erro ao registrar comandos:", error.message);
+    console.error("Detalhes:", error);
+  }
+});

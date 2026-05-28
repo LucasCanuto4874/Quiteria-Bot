@@ -1,9 +1,11 @@
 {
   "name": "testebotdiscord",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.17.3",
+    "dotenv": "^17.4.2",
     "web-streams-polyfill": "^4.1.0"
   }
 }
