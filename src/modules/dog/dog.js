@@ -1,5 +1,5 @@
 import { gerarGif } from "../gif_dogs/gif-dogs.js";
-import { GifEmbed } from "../embeds/gif-embed.js";
+import { GifEmbed } from "../../embeds/gif-embed.js";
 
 export function comandoDog(interaction) {
   if (!interaction.isCommand()) return;

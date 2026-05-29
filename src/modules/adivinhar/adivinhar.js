@@ -1,5 +1,5 @@
 import { gerarGif } from "../gif_dogs/gif-dogs.js";
-import { GifEmbed } from "../embeds/gif-embed.js";
+import { GifEmbed } from "../../embeds/gif-embed.js";
 import { gerarNumeroAleatorio } from "../random_number/random-number.js";
 
 export function comandoAdivinhar(interaction) {

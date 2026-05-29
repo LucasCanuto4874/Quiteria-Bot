@@ -1,9 +1,9 @@
 import { client } from "../app.js";
-import { comandoCalculadora } from "./calculadora/calculadora.js";
-import { comandoDog } from "./dog/dog.js";
-import { comandoAdivinhar } from "./adivinhar/adivinhar.js";
-import { comandoLaura, handleLauraButton } from "./laura/laura-command.js";
-import { comandoSlack } from "./slack/slack.js";
+import { comandoCalculadora } from "./modules/calculadora/calculadora.js";
+import { comandoDog } from "./modules/dog/dog.js";
+import { comandoAdivinhar } from "./modules/adivinhar/adivinhar.js";
+import { comandoLaura, handleLauraButton } from "./modules/laura/laura-command.js";
+import { comandoSlack } from "./modules/slack/slack.js";
 
 client.on("interactionCreate", async (interaction) => {
   const handledButton = await handleLauraButton(interaction);
