@@ -1,17 +1,13 @@
-import { client } from "../../app.js";
-
-export function comandoCalculadora(interaction) {
-    client.on("interactionCreate", async (interaction) => {
+export function comandoCalculadora(interaction, operation) {
         if (!interaction.isCommand()) return 
         
         const resultado = Calculadora(
             interaction.options.getNumber("n1"),
             interaction.options.getNumber("n2"),
-            "somar",
+            operation,
         );
 
         return interaction.reply(`${resultado}`);
-    })
 }
 
 function Calculadora(number1, number2, operation) {
